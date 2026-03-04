@@ -47,6 +47,7 @@ func deleteTask(c *gin.Context) {
 	}
 	idStr, _ := strconv.Atoi(id)                      //turns id into str cause i forgot this way needs it
 	tasks = append(tasks[:idStr], tasks[idStr+1:]...) //deletes the json piece con to id
+	c.IndentedJSON(http.StatusOK, gin.H{"Message": "The task has been deleted succesfully"})
 
 }
 func getTodos(c *gin.Context) { //c = gincontext so gives gin JSON context
