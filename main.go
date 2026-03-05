@@ -48,6 +48,17 @@ func deleteTask(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"Message": "The task has been deleted succesfully"})
 
 }
+func addTask(c *gin.Context) {
+	var newTask task //creating a new task variable like a boss
+
+	if err := c.BindJSON(&newTask); err != nil { //ts binds the json request to &newTask
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"Message": "Invalid request"})
+		return //this just returns some fuckass error
+	}
+
+	tasks = append(tasks, newTask) //appends task newtask cause brr ahh cuh
+	c.IndentedJSON(http.StatusCreated, newTask)
+}
 func getTodos(c *gin.Context) { //c = gincontext so gives gin JSON context
 	c.IndentedJSON(http.StatusOK, tasks) //gets task and transform JSON
 } //status okays the tasks
@@ -56,5 +67,6 @@ func main() {
 	router.GET("/todos", getTodos)                 //on localhost/todos runs func getTodos
 	router.GET("/todos/:id", getTheIdOfTask)       //gets task by id
 	router.DELETE("/todos/delete/:id", deleteTask) //deletes task
-	router.Run("localhost:8080")                   //server on 8080
+	router.POST("/todo", addTask)
+	router.Run("localhost:8080") //server on 8080
 }
