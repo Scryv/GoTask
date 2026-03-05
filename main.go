@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 )
 
 type task struct { //main task struct
@@ -20,17 +19,17 @@ var tasks = []task{ //just some values to get it started will later do csv or sm
 	{ID: "3", Task: "Record", Date: "29-08-26", Done: false},
 }
 
-func getIdTask(id string) (*task, error) { //outputs a struct and err
+func getIdTask(id string) (*task, int, error) { //outputs a struct and err and int for clarification for deletion
 	for i, t := range tasks { //task loop index and value
 		if t.ID == id { //if value == id that u got taken in
-			return &tasks[i], nil //will return the line with that id
+			return &tasks[i], i, nil //will return the line with that id
 		}
 	}
-	return nil, errors.New("No task with that id") //error no task
+	return nil, -1, errors.New("No task with that id") //error no task -1 isnt a thigns so auto err
 }
 func getTheIdOfTask(c *gin.Context) {
-	id := c.Param("id")        //sais id is the id param from /:id
-	task, err := getIdTask(id) //uses task id
+	id := c.Param("id")           //sais id is the id param from /:id
+	task, _, err := getIdTask(id) //uses task id
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"Message": "Task with this id is not found"})
 		return //if there is error it will status not found and custom message
@@ -39,14 +38,13 @@ func getTheIdOfTask(c *gin.Context) {
 
 }
 func deleteTask(c *gin.Context) {
-	var id string = c.Param("id") //takes id param again
-	_, err := getIdTask(id)       //since i dont need the book i just need to know if error or nah
-	if err != nil {               //error handling
+	id := c.Param("id")            //takes id param again
+	_, index, err := getIdTask(id) //since i dont need the book i just need to know if error or nah
+	if err != nil {                //error handling
 		c.IndentedJSON(http.StatusNotFound, gin.H{"Message": "Task with this id doesnt exist"})
 		return
 	}
-	idStr, _ := strconv.Atoi(id)                      //turns id into str cause i forgot this way needs it
-	tasks = append(tasks[:idStr], tasks[idStr+1:]...) //deletes the json piece con to id
+	tasks = append(tasks[:index], tasks[index+1:]...) //deletes the json piece con to id
 	c.IndentedJSON(http.StatusOK, gin.H{"Message": "The task has been deleted succesfully"})
 
 }
